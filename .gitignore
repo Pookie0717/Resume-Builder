@@ -2,3 +2,6 @@ ResumeBuilder/bin/
 ResumeBuilder/obj/
 
 .vs/
+Publish/
+ResumeBuilder/appsettings.local.json
+.env

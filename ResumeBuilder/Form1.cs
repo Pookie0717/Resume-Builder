@@ -10,11 +10,10 @@ namespace ResumeBuilder
         private string currentResumeText;
         private string jobDescription;
         private readonly HttpClient httpClient;
-        private readonly GeminiService geminiService;
+        private readonly OpenAIService openAIService;
         private readonly PdfService pdfService;
         private readonly FileService fileService;
         private readonly ResumeBuilderUI ui;
-        private const string GEMINI_API_KEY = "AIzaSyCR5ultadGqPMSDsgkPdfNj1VB6jNF_MaE";
 
         public Form1()
         {
@@ -22,7 +21,7 @@ namespace ResumeBuilder
             this.MaximizeBox = false;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             httpClient = new HttpClient();
-            geminiService = new GeminiService(GEMINI_API_KEY);
+            openAIService = new OpenAIService(ApiKeyLoader.GetOpenAIApiKey());
             pdfService = new PdfService();
             fileService = new FileService();
             ui = new ResumeBuilderUI();
@@ -174,7 +173,7 @@ namespace ResumeBuilder
         {
             try
             {
-                return await geminiService.OptimizeResume(resume, jobDescription);
+                return await openAIService.OptimizeResume(resume, jobDescription);
             }
             catch (Exception ex)
             {
