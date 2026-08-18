@@ -20,30 +20,144 @@ namespace ResumeBuilder
         {
             try
             {
-                var prompt = $@"Revise the provided resume to precisely match the attached job description. Implement STAR method in experience. Systematically integrate keywords and phrases from the job description into the 'Summary,' 'Key Skills,' and critically, each bullet point within the 'Work Experience' section. For each work experience entry, rephrase or add bullet points that directly demonstrate experience with technologies, methodologies, and responsibilities mentioned in the job description, such as C/C++, Java, Python, FORTRAN, Agile development, system integration, troubleshooting, and supporting radar systems (if applicable from the original resume).
-                    Ensure the revised resume is:
-                    * Highly relevant: Maximize alignment with the job description for ATS optimization.
-                    * Detailed and professional: Provide specific examples and quantifiable achievements where applicable, maintaining a natural, human-written tone.
-                    * Concise: Remove any irrelevant information not pertinent to the job description.
-                    * Summary: Should be within 3 sentences.
-                    * Experience: Should be within 3~4 bullet points. Should include what tech stack you used in the experience and what progress you made.
+                var prompt = $@"ATS RESUME OPTIMIZATION ENGINE
 
-                    Format the entire resume in Markdown, strictly adhering to these rules:
-                    * The first line must be the candidate's name using a single hash (`#`).
-                    * All contact information (`LinkedIn URL`, `Phone Number`, `Email`, `Location`) must be on one single line, separated by a pipe (`|`).
-                    * Use a triple hash (`##`) for top-level section headings (e.g., `## Summary`, `## Education`, `## Key Skills`, `## Work Experience`).
-                    * For each work experience entry, put the header on separate lines with a blank line before the bullet points:
-                      **Job Title**
-                      Company Name – City, State / Remote
-                      Month Year – Month Year
+Revise the provided resume to closely match the attached job description while keeping all information realistic and factually supported by the original resume.
 
-                      - First bullet point...
-                    * Use `**` for bolding ONLY the job title line in each work experience entry. Do NOT bold keywords, technologies, skills, tools, or phrases anywhere else — not in Summary, Key Skills, Education, or bullet points. Weave job-description keywords into plain-text sentences naturally without highlighting them.
-                    * Add a blank line between each work experience entry for readability.
-                    * Ensure proper Markdown spacing and line breaks for readability.
+GOAL:
+Create a recruiter-friendly, ATS-optimized, highly relevant 2-page resume with approximately 950-1100 words.
 
-                    Return only the complete, updated resume content in Markdown format, with no additional explanations or conversational text. The output should be ready for immediate use without further editing.
-                    Resume:
+1. KEYWORD OPTIMIZATION
+Extract important keywords from the job description, including:
+- Job title
+- Programming languages
+- Frameworks
+- Cloud
+- Databases
+- APIs
+- Architecture
+- DevOps and CI/CD
+- Security
+- Testing
+- AI tools
+- Methodologies
+- Domain knowledge
+- Soft skills
+
+Naturally integrate relevant keywords throughout the Professional Summary, Skills, and Experience. Prioritize exact job-description terminology when supported by the candidate's actual experience.
+
+Do not keyword-stuff or invent unsupported experience.
+
+2. PROFESSIONAL SUMMARY
+- One dense paragraph.
+- 4~5 sentences.
+- Begin with ""12 years of experience...""
+- Align closely with the target job title.
+- Include relevant technical stack, system design, scalable platforms, APIs, architecture, cloud, databases, DevOps, delivery methodology, collaboration, and business impact.
+- Naturally include 10-15 important job-description keywords.
+
+3. SKILLS
+Use 6-8 categorized lines:
+
+- Category Name: skill1, skill2, skill3
+
+Prioritize technologies and skills from the job description that are supported by the original resume.
+
+Include AI development tools such as Cursor, Claude, GitHub Copilot, or ChatGPT when relevant and supported.
+
+4. EXPERIENCE
+Include EVERY role from the original resume.
+
+Most recent 2 roles:
+- 5-6 bullets each.
+
+Older roles:
+- Approximately 4 bullets each.
+
+Each bullet must:
+- Start with a strong past-tense action verb.
+- Follow STAR principles naturally.
+- Include technical context, engineering work, and outcome/impact.
+- Integrate relevant job-description keywords.
+- Use credible metrics where supported.
+- Demonstrate architecture, system design, performance, cloud, CI/CD, security, testing, collaboration, or delivery where relevant.
+
+Use strong verbs such as:
+Architected, Designed, Engineered, Built, Developed, Implemented, Automated, Refactored, Scaled, Deployed, Optimized, Integrated, Modernized, Streamlined, Led.
+
+Avoid:
+assisted, helped, worked on, responsible for, participated in.
+
+Do not invent metrics, technologies, responsibilities, or achievements.
+
+End EVERY role with:
+
+Achievement: One or two sentences describing the hardest problem solved in that role and its impact.
+
+5. FORMATTING
+
+Return ONLY the resume in Markdown.
+
+Use exactly:
+
+# Full Name
+Job Title | Key Skill, Key Skill, Key Skill | Platform or Specialty
+City, State | Phone | Email
+
+## PROFESSIONAL SUMMARY
+One paragraph.
+
+## SKILLS
+- Category Name: skill1, skill2, skill3
+
+## EXPERIENCE
+
+Job Title | City, State
+Company | Mon Year - Mon Year
+- Bullet
+- Bullet
+- Bullet
+Achievement: ...
+
+Job Title | City, State
+Company | Mon Year - Mon Year
+- Bullet
+- Bullet
+Achievement: ...
+
+## EDUCATION
+
+University Name | Start Year - End Year
+Degree Name | City, State
+
+## LINKEDIN
+Linkedin profile
+
+6. STRICT RULES
+- Preserve all original employers, dates, locations, education, and factual information.
+- Do not change historical job titles unless clearly supported by the original resume.
+- Do not invent experience.
+- Do not use bold, <b> tags, tables, icons, emojis, or graphics.
+- Do not use em dashes.
+- Use American English.
+- Keep the resume approximately 450-650 words and optimized for exactly 2 pages in A4 paper.
+- Remove irrelevant content.
+- Prioritize recent and job-relevant experience.
+- Keep bullets concise and results-oriented.
+- Every experience entry must end with ""Achievement:"".
+- Section headings must be exactly:
+  ## PROFESSIONAL SUMMARY
+  ## SKILLS
+  ## EXPERIENCE
+  ## EDUCATION
+  ## LINKEDIN
+
+FINAL CHECK:
+Ensure strong ATS keyword alignment, natural keyword density, technical credibility, STAR-style experience bullets, measurable impact where credible, and a professional 2-page layout.
+
+Return ONLY the complete revised resume.
+
+Resume:
                     ${resume}
                     Job Description:
                     ${jobDescription}";
@@ -64,6 +178,76 @@ namespace ResumeBuilder
 
                 var response = await _httpClient.PostAsync(OPENAI_API_URL, content);
 
+                response.EnsureSuccessStatusCode();
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+                return responseObject.choices[0].message.content.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error calling OpenAI API: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<string> AnswerInterviewQuestion(string question, string resume, string jobDescription)
+        {
+            if (string.IsNullOrWhiteSpace(question))
+            {
+                throw new ArgumentException("Please enter an interview question.");
+            }
+
+            if (string.IsNullOrWhiteSpace(resume))
+            {
+                throw new ArgumentException("Please upload a resume first.");
+            }
+
+            if (string.IsNullOrWhiteSpace(jobDescription))
+            {
+                throw new ArgumentException("Please enter a job description on the Resume tab first.");
+            }
+
+            var prompt = $@"You are an interview coach helping a candidate prepare spoken answers for a specific job.
+
+The answer MUST be grounded in BOTH the resume and the job description below. Do not give generic interview advice.
+
+Rules:
+- Write exactly 2 or 3 sentences total.
+- Use only employers, roles, projects, technologies, and achievements that appear in the resume.
+- Tie the answer to requirements, responsibilities, or keywords from the job description.
+- Mention relevant resume experience that proves fit for this job.
+- Answer in a confident, natural, first-person interview tone.
+- Do not invent employers, projects, metrics, or technologies.
+- Do not use bullet points, headings, or labels.
+- Return only the answer text.
+
+Resume:
+{resume}
+
+Job Description:
+{jobDescription}
+
+Interview Question:
+{question}";
+
+            try
+            {
+                var requestBody = new
+                {
+                    model = "gpt-5.4",
+                    messages = new[]
+                    {
+                        new { role = "user", content = prompt }
+                    }
+                };
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(requestBody),
+                    Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PostAsync(OPENAI_API_URL, content);
                 response.EnsureSuccessStatusCode();
 
                 var responseContent = await response.Content.ReadAsStringAsync();
